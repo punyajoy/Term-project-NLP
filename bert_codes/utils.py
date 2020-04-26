@@ -74,24 +74,11 @@ class MultiColumnLabelEncoder:
 
     
 def save_model(model,tokenizer,params):
+    params['path_files']='mbert_fearspeech'
     if(params['to_save']==True):   
-        if(params['csv_file']=='*_full.csv'):
-            translate='actual'
-        elif(params['csv_file']=='*_full_target.csv'):
-            translate='actual_target'
-        elif(params['csv_file']=='*_translated.csv'):
-            translate='translated'
         # Saving best-practices: if you use defaults names for the model, you can reload it using from_pretrained()
-        if(params['how_train']!='all'):
-            output_dir = 'models_saved/'+params['path_files']+'_'+params['language']+'_'+translate+'_'+params['how_train']+'_'+str(params['sample_ratio'])
-        else:
-            output_dir = 'models_saved/'+params['path_files']+'_'+translate+'_'+params['how_train']+'_'+str(params['sample_ratio'])
-    
-        if(params['save_only_bert']):
-            model=model.bert
-            output_dir=output_dir+'_only_bert/'
-        else:
-            output_dir=output_dir+'/'
+        output_dir = 'models_saved/'+params['path_files']
+        output_dir=output_dir+'/'
         print(output_dir)
         # Create output directory if needed
         if not os.path.exists(output_dir):

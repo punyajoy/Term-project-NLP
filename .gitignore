@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+docanno_api_client/
+models_saved/
+*.csv
+account.py
+.ipynb_checkpoints/
+bert_codes/__pycache__/
+

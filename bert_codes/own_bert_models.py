@@ -57,8 +57,7 @@ class SC_weighted_BERT(BertPreTrainedModel):
         self.classifier = nn.Linear(config.hidden_size, self.config.num_labels)
         self.init_weights()
 
-    def forward(hidden_size,
-        self,
+    def forward(self,
         input_ids=None,
         attention_mask=None,
         token_type_ids=None,
