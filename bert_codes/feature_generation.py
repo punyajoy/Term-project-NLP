@@ -243,6 +243,7 @@ def combine_features(sentences,tokenizer,max_length=512, take_pair=True,take_tar
 
 def return_dataloader(input_ids,labels,att_masks,batch_size=8,is_train=False):
     inputs = torch.tensor(input_ids)
+    
     labels = torch.tensor(np.array(labels),dtype=torch.long)
     masks = torch.tensor(np.array(att_masks))
     data = TensorDataset(inputs, masks, labels)
@@ -252,6 +253,19 @@ def return_dataloader(input_ids,labels,att_masks,batch_size=8,is_train=False):
         sampler = RandomSampler(data)
     dataloader = DataLoader(data, sampler=sampler, batch_size=batch_size)
     return dataloader
+
+def return_dataloader_inference(input_ids,att_masks,batch_size=8,is_train=False):
+    inputs = torch.tensor(input_ids)
+    masks = torch.tensor(np.array(att_masks))
+    data = TensorDataset(inputs, masks)
+    if(is_train==False):
+        sampler = SequentialSampler(data)
+    else:
+        sampler = RandomSampler(data)
+    dataloader = DataLoader(data, sampler=sampler, batch_size=batch_size)
+    return dataloader
+
+
 
 def return_cnngru_dataloader(tuples,batch_size=8,is_train=False):
 
