@@ -50,20 +50,6 @@ torch.cuda.set_device(1)
 # In[5]:
 
 
-params={
-    'max_length':512,
-    'path_files': '../../multilingual_hatespeech/multilingual_bert',
-    'what_bert':'weighted',
-    'batch_size':8,
-    'is_train':True,
-    'learning_rate':2e-5,
-    'epsilon':1e-8,
-    'random_seed':2020,
-    'epochs':10,
-    'to_save':True,
-    'weights':[1.0,9.0]
-
-}
 
 
 # In[6]:
@@ -135,7 +121,7 @@ def save_trained_model(params):
     total_steps = len(train_dataloader) * params['epochs']
 
     scheduler = get_linear_schedule_with_warmup(optimizer, 
-                                                    num_warmup_steps = 0, # Default value in run_glue.py
+                                                    num_warmup_steps = int(total_steps/5), # Default value in run_glue.py
                                                     num_training_steps = total_steps)
 
     
@@ -337,7 +323,21 @@ def cross_validate_bert(params):
     
 
 # In[8]:
+params={
+    'max_length':512,
+    'path_files': '../../multilingual_hatespeech/multilingual_bert',
+    'what_bert':'normal',
+    'batch_size':8,
+    'is_train':True,
+    'learning_rate':2e-5,
+    'epsilon':1e-8,
+    'random_seed':2020,
+    'epochs':6,
+    'to_save':True,
+    'weights':[1.0,9.0]
+
+}
 
 
-cross_validate_bert(params)
-#save_trained_model(params)
+#cross_validate_bert(params)
+save_trained_model(params)

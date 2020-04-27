@@ -182,15 +182,15 @@ def custom_tokenize_pair_two(sentences,tokenizer,max_length=[256,256],frag=5000)
             mins=frag    
           
         
-        sentences_back.append([0:mins])
-        back_sent=sent[-mins:])
+        sentences_front.append(sent[0:mins])
+        sentences_back.append(sent[-mins:])
     
     encode_sent1=custom_tokenize(sentences_0,tokenizer,ml_sent1)
     encode_sent2=custom_tokenize(sentences_1,tokenizer,ml_sent2)
     
     print('encoded sent', encode_sent1[0])
     input_ids=[]
-    for sent1,sent2 in zip(encode_sent1,encode_sent2):
+    for sent1,sent2 in zip(sentences_front,sentences_back):
         sent=list(sent1)+list(sent2[1:])
         input_ids.append(sent)
     return input_ids
@@ -231,7 +231,9 @@ def custom_att_masks(input_ids):
     return attention_masks
 
 def combine_features(sentences,tokenizer,max_length=512, take_pair=True,take_target=False):
+    
     input_ids=custom_tokenize_fs(sentences,tokenizer,max_length)
+    #input_ids=custom_tokenize_pair_two(sentences,tokenizer,max_length=[256,256],frag=5000)
     print('Input shape before truncating',input_ids[0:5])
     input_ids = pad_sequences(input_ids, dtype="long", 
                           value=0, truncating="post", padding="post")

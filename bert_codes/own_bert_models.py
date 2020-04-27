@@ -2,14 +2,14 @@ from transformers.modeling_bert import *
 
 
 
-def select_model(type_of_model,path,weights=None,label_list=None,num_labels = 2):
+def select_model(type_of_model,path,weights=None,label_list=None,num_labels = 2,drop_out=0.1):
     if(type_of_model=='weighted'):
         model = SC_weighted_BERT.from_pretrained(
         path, # Use the 12-layer BERT model, with an uncased vocab.
         num_labels = num_labels, # The number of output labels--2 for binary classification             # You can increase this for multi-class tasks.   
         output_attentions = False, # Whether the model returns attentions weights.
         output_hidden_states = False, # Whether the model returns all hidden-states.
-
+         hidden_dropout_prob=0.1,
         weights=weights
     )
     elif(type_of_model=='normal'):
@@ -18,7 +18,7 @@ def select_model(type_of_model,path,weights=None,label_list=None,num_labels = 2)
           num_labels = num_labels, # The number of output labels--2 for binary classification             # You can increase this for multi-class tasks.   
           output_attentions = False, # Whether the model returns attentions weights.
           output_hidden_states = False, # Whether the model returns all hidden-states.
-          hidden_dropout_prob=0.3
+          hidden_dropout_prob=0.1
         )
     elif(type_of_model=='multitask'):
         model = BertForMultitask.from_pretrained(
