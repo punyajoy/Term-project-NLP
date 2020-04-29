@@ -13,8 +13,8 @@ from sklearn.model_selection import StratifiedKFold
 from transformers import BertTokenizer
 from transformers import BertForSequenceClassification, AdamW, BertConfig
 from sklearn.metrics import accuracy_score,f1_score
-
-
+from utils_function import pandas_classification_report
+from sklearn.utils.class_weight import compute_class_weight
 # In[3]:
 
 
@@ -97,7 +97,7 @@ def Eval_phase(params,test_dataloader,which_files='test',model=None):
     print(" Accuracy: {0:.2f}".format(testacc))
     print(" Fscore: {0:.2f}".format(testf1))
     print(" Test took: {:}".format(format_time(time.time() - t0)))
-    return testf1,testacc
+    return testf1,testacc,true_labels,pred_labels
 
 
 # In[7]:
@@ -192,9 +192,13 @@ def save_trained_model(params):
 
 
 def cross_validate_bert(params):
+    
     total_data=pd.read_csv('Total_data_annotated.csv')
     all_sentences = total_data.text
     all_labels=total_data.label
+    
+    
+    params['weights']=list(compute_class_weight("balanced", np.unique(all_labels),all_labels).astype(float))
     print('Loading BERT tokenizer...')
     tokenizer = BertTokenizer.from_pretrained(params['path_files'], do_lower_case=False)
     input_total_ids,att_masks_total=combine_features(all_sentences,tokenizer,params['max_length'],
@@ -208,6 +212,10 @@ def cross_validate_bert(params):
     list_val_accuracy=[]
     list_val_fscore=[]
     list_epoch=[]
+    
+    list_total_preds=[]
+    list_total_truth=[]
+    
     for train_index, test_index in skf.split(input_total_ids, all_labels):
         print("TRAIN:", train_index, "TEST:", test_index)
         input_train_ids,att_masks_train,labels_train=input_total_ids[train_index],att_masks_total[train_index],all_labels[train_index]
@@ -239,6 +247,8 @@ def cross_validate_bert(params):
         best_val_fscore=0
         best_val_accuracy=0
         epoch_count=0
+        best_true_labels=[]
+        best_pred_labels=[]
         for epoch_i in range(0, params['epochs']):
             print("")
             print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, params['epochs']))
@@ -300,44 +310,49 @@ def cross_validate_bert(params):
 
             # Calculate the average loss over the training data.
             avg_train_loss = total_loss / len(train_dataloader)
-            train_fscore,train_accuracy=Eval_phase(params,train_dataloader,'train',model)
+            train_fscore,train_accuracy,_,_=Eval_phase(params,train_dataloader,'train',model)
             print('avg_train_loss',avg_train_loss)
             print('train_fscore',train_fscore)
             print('train_accuracy',train_accuracy)
             # Store the loss value for plotting the learning curve.
             loss_values.append(avg_train_loss)
-            val_fscore,val_accuracy=Eval_phase(params,validation_dataloader,'val',model)		
+            val_fscore,val_accuracy,true_labels,pred_labels=Eval_phase(params,validation_dataloader,'val',model)		
             #Report the final accuracy for this validation run.
             if(val_fscore > best_val_fscore):
                 print(val_fscore,best_val_fscore)
                 best_val_fscore=val_fscore
                 best_val_accuracy=val_accuracy
                 epoch_count=epoch_i
+                best_pred_labels=pred_labels
+                best_true_labels=true_labels
+        list_total_preds+=best_pred_labels
+        list_total_truth+=best_true_labels
         list_val_fscore.append(best_val_fscore)
         list_val_accuracy.append(best_val_accuracy)
         list_epoch.append(epoch_count)
+       
     print("Accuracy: %0.2f (+/- %0.2f)" % (np.array(list_val_accuracy).mean(), np.array(list_val_accuracy).std() * 2))
     print("Fscore: %0.2f (+/- %0.2f)" % (np.array(list_val_fscore).mean(), np.array(list_val_fscore).std() * 2))
     print("Epoch: %0.2f (+/- %0.2f)" % (np.array(list_epoch).mean(), np.array(list_epoch).std() * 2))
-   
+    print(pandas_classification_report(list_total_truth, list_total_preds))
     
 
 # In[8]:
 params={
     'max_length':512,
     'path_files': '../../multilingual_hatespeech/multilingual_bert',
-    'what_bert':'normal',
+    'what_bert':'weighted',
     'batch_size':8,
     'is_train':True,
     'learning_rate':2e-5,
     'epsilon':1e-8,
     'random_seed':2020,
-    'epochs':6,
+    'epochs':10,
     'to_save':True,
     'weights':[1.0,9.0]
 
 }
 
 
-#cross_validate_bert(params)
-save_trained_model(params)
+cross_validate_bert(params)
+#save_trained_model(params)

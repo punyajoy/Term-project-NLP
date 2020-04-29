@@ -9,7 +9,7 @@ def select_model(type_of_model,path,weights=None,label_list=None,num_labels = 2,
         num_labels = num_labels, # The number of output labels--2 for binary classification             # You can increase this for multi-class tasks.   
         output_attentions = False, # Whether the model returns attentions weights.
         output_hidden_states = False, # Whether the model returns all hidden-states.
-         hidden_dropout_prob=0.1,
+         hidden_dropout_prob=0.2,
         weights=weights
     )
     elif(type_of_model=='normal'):

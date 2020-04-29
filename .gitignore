@@ -132,4 +132,6 @@ models_saved/
 account.py
 .ipynb_checkpoints/
 bert_codes/__pycache__/
-
+*.csv
+Results/
+*.html
